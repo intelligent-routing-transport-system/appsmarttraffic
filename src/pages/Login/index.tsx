@@ -1,10 +1,12 @@
-import React from 'react'
-import {Image, KeyboardAvoidingView, Platform, View, ScrollView} from 'react-native'
+import React, {useCallback, useRef} from 'react'
+import {Image, KeyboardAvoidingView, Platform, View, ScrollView, TextInput} from 'react-native'
 import logo from '../../assets/Logo.png'
 import Button from '../../components/Button'
 import Input from '../../components/Input'
 import Icon from 'react-native-vector-icons/Feather'
 import {useNavigation} from '@react-navigation/native'
+import {Form} from '@unform/mobile'
+import {FormHandles} from '@unform/core'
 
 import {
     Container, 
@@ -17,6 +19,11 @@ import {
 
 const Login: React.FC = () => {
     const navigation = useNavigation();
+    const formRef = useRef<FormHandles>(null);
+    const passwordInputRef = useRef<TextInput>(null);
+    const handleSignIn = useCallback((data:object) => {
+        console.log(data)
+    }, [])
 
     return (
         <>
@@ -35,11 +42,34 @@ const Login: React.FC = () => {
                         <View>
                             <Title>Faça seu login</Title>
                         </View>
+                        <Form ref={formRef} onSubmit={handleSignIn}>
+                            <Input 
+                                autoCorrect={false}
+                                autoCapitalize='none'
+                                keyboardType='email-address'
+                                name="email" 
+                                icon="mail" 
+                                placeholder="Email"
+                                returnKeyType='next'
+                            />
+                            <Input 
+                                ref={passwordInputRef}
+                                secureTextEntry
+                                name="password" 
+                                icon="lock" 
+                                placeholder="Senha"
+                                returnKeyType='send'
+                                onSubmitEditing={() => {
+                                    formRef.current?.submitForm()
+                                }}
+                            />
 
-                        <Input name="email" icon="mail" placeholder="Email"/>
-                        <Input name="password" icon="lock" placeholder="Senha"/>
-
-                        <Button onPress={() => {}}>Entrar</Button>
+                            <Button onPress={() => {
+                                formRef.current?.submitForm()
+                                }
+                            }>Entrar
+                            </Button>
+                        </Form>
 
                         <ForgotPassword onPress={() => {}}>
                             <ForgotPasswordText>Esqueci minha senha</ForgotPasswordText>

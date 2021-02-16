@@ -1,3 +1,3 @@
 # appsmarttraffic
 
-![Alt text](/screenshot/profile.jpg "Perfil")
+![Alt text](/screenshot/perfil.jpg "Perfil")

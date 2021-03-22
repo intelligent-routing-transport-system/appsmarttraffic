@@ -1,10 +1,12 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import { NavigationContainer } from  '@react-navigation/native'
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import DrawerMenu from '../components/Drawer'
 
 import Home from '../pages/Home'
+import Login from '../pages/Login'
+import Profile from '../pages/Profile'
+import CreateUser from '../pages/CreateUser'
 
 const Auth = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -15,19 +17,10 @@ const AuthRoutes: React.FC = () => (
             initialRouteName="Home"
         >
             <Drawer.Screen name="Home" component={Home} />
+            <Drawer.Screen name="Login" component={Login} />
+            <Drawer.Screen name="Profile" component={Profile} />
+            <Drawer.Screen name="CreateUser" component={CreateUser} />
         </Drawer.Navigator>
 )
-
-// const AuthRoutes: React.FC = () => (
-//     <Auth.Navigator
-//         screenOptions={{
-//             headerShown: false,
-//             cardStyle: {backgroundColor: '#7159c1'}
-//         }}
-//         initialRouteName="Home"
-//     >
-//         <Auth.Screen name="Home" component={Home}/>
-//     </Auth.Navigator>
-// )
 
 export default AuthRoutes;

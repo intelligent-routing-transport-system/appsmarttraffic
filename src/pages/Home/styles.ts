@@ -39,7 +39,7 @@ export const TouchButton = styled.TouchableOpacity`
 
 export const InfoContainer = styled.View<InfoContainerViewProps>`
     width: 100%;
-    height: 140px;
+    height: 120px;
 
     margin-bottom: 8px;
 
@@ -57,7 +57,7 @@ export const InfoContainer = styled.View<InfoContainerViewProps>`
 
 export const InfoBusView = styled.View`
     width: 100%;
-    height: 140px;
+    height: 120px;
     background: #232129;
     border-top-left-radius: 25px;
     border-bottom-left-radius: 25px;
@@ -94,7 +94,7 @@ export const InfoTimeNowText = styled.Text`
 
 export const InfoTimeRemainingView = styled.View`
     width: 100%;
-    height: 140px;
+    height: 120px;
     background: #232129;
     border: 1px;
     border-color: #9474FF;

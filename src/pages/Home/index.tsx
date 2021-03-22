@@ -72,31 +72,23 @@ const Home: React.FC = () => {
         ]}
     ])
 
-    const [teste, setTeste] = useState<string>('TESTE')
-    const [wayPoints, setWayPoints] = useState<WayPoint[]>([
-            {pointName: 'ponto 1'}, 
-            {pointName: 'ponto 2'}, 
-            {pointName: 'ponto 3'},
-            {pointName: 'ponto 4'}, 
-            {pointName: 'ponto 5'}, 
-            {pointName: 'ponto 6'}, 
-            {pointName: 'ponto 7'},
-            {pointName: 'ponto 8'}
+    const [teste, setTeste] = useState<string>('Linha 20');
+    const [wayPoints, setWayPoints] = useState<WayPoint[] | undefined>([]);
+    const [searchRoutes, setSearchRoutes] = useState<Route[]>([]);
+    const [routePressed, setRoutePressed] = useState<string>('');
 
-    ])
-    const [searchRoutes, setSearchRoutes] = useState<Route[]>([])
-
-    const [showWayPoints, setShowWayPoint] = useState(false)
-    const [showInfoContainer, setShowInfoContainer] = useState(false)
+    const [showWayPoints, setShowWayPoint] = useState(false);
+    const [showInfoContainer, setShowInfoContainer] = useState(false);
 
     const TextRef = useRef<Text>(null);
     const flatListRef = useRef<FlatList>(null);
     const formRef = useRef<FormHandles>(null);
     const searchInputRef = useRef<TextInput>(null);
+    const navigation = useNavigation();
 
     const handleWayPoints = useCallback(() => {
         setShowWayPoint(!showWayPoints);
-    },[showWayPoints])
+    },[showWayPoints, wayPoints])
 
     const search = useCallback((data: string) => {
         var values = routes.filter(x => x.routeName.toUpperCase().includes(data.toUpperCase()));
@@ -110,7 +102,10 @@ const Home: React.FC = () => {
     },[searchRoutes])
 
     const handleShowInfoContainer = useCallback(() => {
-        console.log(TextRef.current)
+        console.log(routePressed);
+        var route = searchRoutes.find(x => x.routeName == routePressed);
+        console.log(route);
+        setWayPoints(route?.wayPoints);
         setShowInfoContainer(!showInfoContainer);
         setSearchRoutes([]);
     },[showInfoContainer, searchRoutes])
@@ -146,7 +141,10 @@ const Home: React.FC = () => {
                             <SearchWayPointView>
                                 <SearchWayPointTouchButton 
                                     onPress={
-                                        () => {formRef.current?.submitForm()}
+                                        () => {
+                                            setRoutePressed(item.routeName);
+                                            formRef.current?.submitForm();
+                                        }
                                 }>
                                     <SearchWayPonitText ref={TextRef}>{item.routeName}</SearchWayPonitText>
                                 </SearchWayPointTouchButton>
@@ -154,7 +152,9 @@ const Home: React.FC = () => {
                         )}
                     />
                 </Form>
-                <TouchButton onPress={() => {}}>
+                <TouchButton onPress={() => {
+                    navigation.openDrawer();
+                }}>
                     <Icon name="grid" size={26} color="#fff"/>
                 </TouchButton>
             </Header>

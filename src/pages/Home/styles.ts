@@ -28,24 +28,20 @@ export const TouchButton = styled.TouchableOpacity`
     height: 52px;
     border-radius: 26px;
 
-    background: #232129;
-
-    border: 0.5px;
-    border-color: #fff;
+    background: #070E3C;
 
     align-items: center;
     justify-content: center;  
 `
 
 export const InfoContainer = styled.View<InfoContainerViewProps>`
-    width: 100%;
     height: 120px;
+    width: 100%;
 
     margin-bottom: 8px;
 
     align-items: center;
     flex-direction: row;
-    justify-content: space-between;
 
     ${props => props.showInfoContainer && css`
         opacity: 1;
@@ -55,20 +51,6 @@ export const InfoContainer = styled.View<InfoContainerViewProps>`
     `}
 `
 
-export const InfoBusView = styled.View`
-    width: 100%;
-    height: 120px;
-    background: #232129;
-    border-top-left-radius: 25px;
-    border-bottom-left-radius: 25px;
-    border: 1px;
-    border-color: #9474FF;
-
-    flex: 1;
-    align-items: center;
-    justify-content: center;
-`
-
 export const InfoBusText = styled.Text`
     color: #9474FF;
     font-size: 20px;
@@ -76,69 +58,53 @@ export const InfoBusText = styled.Text`
 `
 
 export const InfoTimeNowView = styled.View`
-    height: 100%;
-    align-items: center;
+    height: 100%;    
     justify-content: center;
-    background: #232129;
-    border: 1px;
-    border-color: #9474FF;
-    padding: 50px;
+    background: #070E3C;
+
+    border-top-right-radius: 25px;
+    border-bottom-right-radius: 25px;
+    border-width: 0.5px;
+
     flex: 1;
 `
 
 export const InfoTimeNowText = styled.Text`
-    font-size: 26px;
+    font-size: 18px;
     font-family: 'RobotoSlab-Regular';
     color: #fff;
+    margin-left: 16px;
 `
 
-export const InfoTimeRemainingView = styled.View`
-    width: 100%;
+export const InfoShowWayPointsView = styled.View`
     height: 120px;
-    background: #232129;
-    border: 1px;
-    border-color: #9474FF;
+    width: 100px;
+    background: #070E3C;
+    border: 0.5px;
+    border-color: #fff;
 
-    border-top-right-radius: 25px;
-    border-bottom-right-radius: 25px;
+    border-top-left-radius: 25px;
+    border-bottom-left-radius: 25px;
 
     justify-content: center;
     align-items: center;
-    flex: 1;
 `
 
 export const InfoTimeRemainingText = styled.Text`
     font-size: 18px;
-    font-family: 'RobotoSlab-Regular';
+    font-family: 'RobotoSlab-Medium';
     color: #fff;
-`
-
-export const ContainerWayPoints = styled.View`
-    align-items: center;
-`
-
-export const WayPointButton = styled.TouchableOpacity`
-    width: 52px;
-    height: 52px;
-    border-radius: 26px;
-    background: #232129;
-    bottom: 26px;
-
-    border: 0.5px;
-    border-color: #9474FF;
-
-    align-items: center;
-    justify-content: center;
+    margin-left: 16px;
 `
 
 export const WayPointsView = styled.View<WayPointViewProps>`
     width: 100%;
-    background: #232129;
+    background: #070E3C;
 
-    align-items: center;
+    align-items:center;
 
-    border: 0.5px;
-    border-color: #9474FF;
+    border-top-left-radius: 26px;
+    border-top-right-radius: 26px;
 
     ${props => props.showWayPoints == true && css`
         height: 400px;
@@ -154,6 +120,20 @@ export const WayPointsView = styled.View<WayPointViewProps>`
     `}
 `
 
+export const WayPointButton = styled.TouchableOpacity`
+    width: 52px;
+    height: 52px;
+    border-radius: 26px;
+    background: #070E3C;
+    bottom: 26px;
+
+    border: 0.5px;
+    border-color: #FFC66C;
+
+    align-items: center;
+    justify-content: center;
+`
+
 export const WayPonitTitle = styled.Text`
     font-size: 26px;
     font-family: 'RobotoSlab-Regular';
@@ -161,20 +141,20 @@ export const WayPonitTitle = styled.Text`
     bottom: 10px;
 `
 export const WayPointView = styled.View`
-    border-bottom-width: 1px;
-    border-color: #9474FF;
+    padding: 16px;
     align-items: center;
-    justify-content: center;
-    padding: 8px;
+    flex-direction: row;
 `
 export const WayPonitText = styled.Text`
     font-size: 18px;
     font-family: 'RobotoSlab-Regular';
     color: #fff;
+    margin-left: 16px;
 `
 
 export const WayPointsList = styled(FlatList as new () => FlatList<WayPoint>)`
-    width: 80%;
+    margin-top: 16px;
+    width: 60%;
     margin-bottom: 24px;
 `
 
@@ -201,4 +181,41 @@ export const SearchWayPonitText = styled.Text`
     font-size: 18px;
     font-family: 'RobotoSlab-Regular';
     color: #000;
+`
+
+export const TitlesView = styled.View`
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+`
+
+export const SubViewTitles = styled.View`
+`
+
+export const WayPointTitleTimeArive = styled.Text`
+    color: #fff;
+    font-size: 46px;
+    font-family: 'RobotoSlab-Medium';
+    margin-right: 16px;
+`
+
+export const WayPonitTitleDistance = styled.Text`
+    color: #C1C1C1;
+    font-size: 18px;
+    font-family: 'RobotoSlab-Medium';
+`
+
+export const WayPonitTitleName = styled.Text`
+    color: #fff;
+    font-size: 18px;
+    font-family: 'RobotoSlab-Medium';
+`
+
+export const IconCheckView = styled.View`
+    height: 24px;
+    width: 24px;
+    border-radius: 12px;
+    background: #FF9000;
+    align-items: center;
+    justify-content: center;
 `

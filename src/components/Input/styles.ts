@@ -11,10 +11,10 @@ export const Container = styled.View<ContainerProps>`
     margin-top: 8px;
     width: 100%;
     height: 60px;
-    background: #232129;
+    background: #070E3C;
     padding: 0 16px;
-    border-radius: 10px;
-    border-width: 2px;
+    border-radius: 12px;
+    border-width: 1px;
     border-color: #232129;
 
     ${props => props.isErrored && css`
@@ -22,7 +22,7 @@ export const Container = styled.View<ContainerProps>`
     `}
 
     ${props => props.isFocused && css`
-        border-color: #9474FF;
+        border-color: #FFC66C;
     `}
 
     flex-direction: row;

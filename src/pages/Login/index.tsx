@@ -10,7 +10,6 @@ import * as Yup from 'yup'
 import getValidationErrors from '../../utils/getValidationErrors'
 
 import {
-    Image, 
     KeyboardAvoidingView, 
     Platform, 
     View, 
@@ -25,7 +24,8 @@ import {
     ForgotPassword, 
     ForgotPasswordText, 
     CreateAccountText, 
-    CreateAccountButton
+    CreateAccountButton,
+    Logo
 } from './styles'
 
 interface SignInFormData {
@@ -87,8 +87,7 @@ const Login: React.FC = () => {
                     contentContainerStyle={{flex: 1}}
                 >
                     <Container>
-                        <Image source={logo}/>
-
+                        <Logo source={logo}/>
                         <View>
                             <Title>Faça seu login</Title>
                         </View>

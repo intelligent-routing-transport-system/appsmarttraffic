@@ -14,23 +14,27 @@ import {
     Header,
     TouchButton,
     InfoContainer,
-    InfoBusText,
     InfoTimeNowText,
-    InfoTimeRemainingText,
-    InfoBusView,
+    InfoShowWayPointsView,
     InfoTimeNowView,
-    InfoTimeRemainingView,
+    InfoTimeRemainingText,
     WayPointsView,
     WayPonitTitle,
     WayPointsList,
-    ContainerWayPoints,
     WayPointButton,
     WayPointView,
     WayPonitText,
     SearchWayPointView,
     SearchWayPointTouchButton,
     SearchWayPointsList,
-    SearchWayPonitText
+    SearchWayPonitText,
+    TitlesView,
+    WayPointTitleTimeArive,
+    WayPonitTitleDistance,
+    WayPonitTitleName,
+    SubViewTitles,
+    IconCheckView
+
 } from './styles'
 
 export interface WayPoint {
@@ -155,44 +159,46 @@ const Home: React.FC = () => {
                 <TouchButton onPress={() => {
                     navigation.openDrawer();
                 }}>
-                    <Icon name="grid" size={26} color="#fff"/>
+                    <Icon name="grid" size={26} color="#FFC66C"/>
                 </TouchButton>
             </Header>
         </Container>
         <InfoContainer showInfoContainer={showInfoContainer}>
-                <InfoBusView>
-                    <TouchButton onPress={handleShowInfoContainer}>
-                        <Icon name="x" size={26} color="#fff"/>
-                    </TouchButton>
-                </InfoBusView>
-                <InfoTimeNowView>
-                    <InfoTimeNowText>10:30</InfoTimeNowText>
-                    <InfoTimeRemainingText>48 min</InfoTimeRemainingText>
-                </InfoTimeNowView>
-                <InfoTimeRemainingView>
-                    <TouchButton onPress={handleWayPoints}>
-                        <Icon name="map-pin" size={26} color="#fff"/>
-                    </TouchButton>
-                </InfoTimeRemainingView>
+            <InfoShowWayPointsView>
+                <TouchButton onPress={handleWayPoints}>
+                    <Icon name="map-pin" size={40} color="#FFC66C"/>
+                </TouchButton>
+            </InfoShowWayPointsView>
+            <InfoTimeNowView>
+                <InfoTimeNowText>Previsão de chegada: 10h30</InfoTimeNowText>
+                <InfoTimeRemainingText>Distancia: 30m</InfoTimeRemainingText>
+            </InfoTimeNowView>      
         </InfoContainer>  
                 
-        <ContainerWayPoints>
-            <WayPointsView showWayPoints={showWayPoints}>
-                <WayPointButton onPress={handleWayPoints}>
-                    <Icon name="arrow-down" size={26} color="#9474FF"/>
-                </WayPointButton>
-                <WayPonitTitle>{teste}</WayPonitTitle>
-                <WayPointsList
-                    data={wayPoints}
-                    keyExtractor={(wayPoints) => wayPoints.pointName}
-                    renderItem={({item}) => (
-                            <WayPointView>
-                                <WayPonitText>{item.pointName}</WayPonitText>
-                            </WayPointView>
-                    )}
-                />
-                </WayPointsView>
-        </ContainerWayPoints>
+        <WayPointsView showWayPoints={showWayPoints}>     
+            <WayPointButton onPress={handleWayPoints}>
+                <Icon name="arrow-down" size={26} color="#FFC66C"/>
+            </WayPointButton>
+            <TitlesView>
+                <WayPointTitleTimeArive>18h60</WayPointTitleTimeArive>
+                <SubViewTitles>
+                    <WayPonitTitleDistance>Direção</WayPonitTitleDistance>
+                    <WayPonitTitleName>Quimicos</WayPonitTitleName>
+                </SubViewTitles>
+            </TitlesView>
+            <WayPointsList
+                data={wayPoints}
+                keyExtractor={(wayPoints) => wayPoints.pointName}
+                renderItem={({item}) => (
+                        <WayPointView>
+                            <IconCheckView>
+                                <Icon name="check" size={18} color="#fff"/>
+                            </IconCheckView>
+                            <WayPonitText>{item.pointName}</WayPonitText>
+                        </WayPointView>
+                )}
+            />
+        </WayPointsView>
     </>
     )
 }

@@ -6,14 +6,14 @@ export const Container = styled.View`
   align-items: center;
   justify-content: center;
   padding: 0 30px ${Platform.OS === 'android' ? 150 : 40}px;
-  background: #673ab7;
+  background: #fff;
 `;
 
 export const Title = styled.Text`
   font-size: 24px;
   color: #fff;
   font-family: 'RobotoSlab-Medium';
-  margin: 64px 0 24px;
+  margin: 0 0 24px;
 `;
 
 export const ForgotPassword = styled.TouchableOpacity`
@@ -42,4 +42,6 @@ export const CreateAccountText = styled.Text`
   font-family: "RobotoSlab-Regular";
   font-size: 18px;
   margin-left: 16px;
+`
+export const Logo = styled.Image`
 `

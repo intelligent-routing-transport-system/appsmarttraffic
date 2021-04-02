@@ -18,7 +18,7 @@ interface InputRef {
 }
 
 const Input: React.ForwardRefRenderFunction<InputRef ,InputProps> = (
-    {name, icon, ...rest}, 
+    {name, icon, value, ...rest}, 
     ref,
 ) => {
     const inputElementRef = useRef<any>(null);
@@ -42,6 +42,9 @@ const Input: React.ForwardRefRenderFunction<InputRef ,InputProps> = (
         focus() {
           inputElementRef.current.focus();
         },
+        setValue(data: string){
+            inputValueRef.current.value = data;
+        }
       }));
 
     useEffect(() => {
@@ -58,6 +61,7 @@ const Input: React.ForwardRefRenderFunction<InputRef ,InputProps> = (
                 inputElementRef.current.clear();
             }
         })
+        inputValueRef.current.value = value
     },[fieldName, registerField])
     
     return (

@@ -1,49 +1,26 @@
 import styled from 'styled-components/native'
+import {FlatList} from 'react-native'
 
 export const Container = styled.View`
     flex: 1;
 `
 
-export const ButtonsView = styled.View`
-    justify-content: space-between;
-    flex-direction: row;
-`
-
-export const TouchButton = styled.TouchableOpacity`
-    width: 140px;
-    height:80px;
-
-    background: #9474FF;
-    align-items: center;
-    justify-content: center;
-`
-
-export const ProfileButton = styled.TouchableOpacity`
-    margin-top: 50px;
-    margin-bottom: 26px;
-
-    align-items: center;
-    justify-content: center;
-`
-
-export const UserAvatar = styled.Image`
-    width: 186px;
-    height: 186px;
-    border-radius: 93px;
-`
-
-export const SettingsView = styled.View`
-    background: #775be2;
+export const FavoriteLinesView = styled.View`
+    background: #070E3C;
     flex: 1;
 `
 
-export const TouchButtonPages = styled.TouchableOpacity`
-    margin-top: 20px;
-    align-items: center;
-    justify-content: center;
-`
-
-export const TouchButtonPagesText =styled.Text`
+export const TitleFavoritesLines = styled.Text`
+    font-family: 'RobotoSlab-Medium';
     font-size: 24px;
     color: #fff;
+
+    margin-left: 8px;
+    margin-top: 8px;
+`
+
+export const FavoriteLinesList = styled(FlatList as new () => FlatList<string>)`
+    width: 100%;
+    margin-bottom: 24px;
+    background: #fff;
 `

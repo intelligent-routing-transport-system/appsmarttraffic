@@ -34,6 +34,19 @@ export const TouchButton = styled.TouchableOpacity`
     justify-content: center;  
 `
 
+export const TouchButtonMarkBlockPoint = styled.TouchableOpacity`
+    width: 52px;
+    height: 52px;
+    border-radius: 26px;
+
+    background: #070E3C;
+
+    align-items: center;
+    justify-content: center;  
+
+    margin-top: 8px;
+`
+
 export const InfoContainer = styled.View<InfoContainerViewProps>`
     height: 120px;
     width: 100%;
@@ -218,4 +231,79 @@ export const IconCheckView = styled.View`
     background: #FF9000;
     align-items: center;
     justify-content: center;
+`
+
+export const FavoriteLinesView = styled.View`
+    width:70%;
+    height: 100%;
+    background: #070E3C;
+    flex: 1;
+
+    position: absolute;
+`
+
+export const TitleFavoritesLines = styled.Text`
+    font-family: 'RobotoSlab-Medium';
+    font-size: 24px;
+    color: #fff;
+
+    margin-left: 8px;
+    margin-top: 8px;
+`
+
+export const FavoriteLinesList = styled(FlatList as new () => FlatList<string>)`
+    width: 100%;
+    margin-bottom: 24px;
+`
+
+export const HistoryLines = styled.View`
+    height: 50%;
+`
+
+export const CreateBlockPointView = styled.ScrollView`
+    width:100%;
+    height: 50%;
+    background: #070E3C;
+    flex: 1;
+
+    padding: 0 26px;
+
+    position: absolute;
+    bottom: 0;
+`
+
+export const TitleCreateBlockPoint = styled.Text`
+    font-family: 'RobotoSlab-Medium';
+    font-size: 24px;
+    color: #fff;
+
+    margin-left: 8px;
+    margin-top: 8px;
+`
+
+export const TitleDescriptionBlockPoint = styled.Text`
+    font-family: 'RobotoSlab-Medium';
+    font-size: 18px;
+    color: #c1c1c1;
+
+    margin-top: 8px;
+    margin-left: 8px;
+    margin-bottom: 8px;
+`
+
+export const BlockPointLocationView = styled.View` 
+    align-items: center;
+`
+
+export const TouchButtonExitCreateBlockPoint = styled.TouchableOpacity`
+    width: 52px;
+    height: 52px;
+    border-radius: 26px;
+
+    background: #FFC66C;
+
+    align-items: center;
+    justify-content: center;  
+
+    margin-top: 16px;
 `

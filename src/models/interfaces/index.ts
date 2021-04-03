@@ -31,3 +31,8 @@ export interface Route {
     routeName: string;
     wayPoints: WayPoint[];
 }
+
+export interface HistoryLinesInterface {
+    routeName: string;
+    routeId: string;
+}

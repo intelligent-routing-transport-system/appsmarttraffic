@@ -1,6 +1,6 @@
 import styled, {css} from 'styled-components/native'
 import {FlatList} from 'react-native'
-import {WayPoint, Route} from './index'
+import {WayPoint, Route, HistoryLinesInterface} from '../../models/interfaces'
 
 interface WayPointViewProps {
     showWayPoints: boolean;
@@ -47,6 +47,10 @@ export const TouchButtonMarkBlockPoint = styled.TouchableOpacity`
     margin-top: 8px;
 `
 
+export const InfoView = styled.View`
+    align-items: center;
+`
+
 export const InfoContainer = styled.View<InfoContainerViewProps>`
     height: 120px;
     width: 100%;
@@ -75,8 +79,6 @@ export const InfoTimeNowView = styled.View`
     justify-content: center;
     background: #070E3C;
 
-    border-top-right-radius: 25px;
-    border-bottom-right-radius: 25px;
     border-width: 0.5px;
 
     flex: 1;
@@ -110,6 +112,21 @@ export const InfoTimeRemainingText = styled.Text`
     margin-left: 16px;
 `
 
+export const InfoCloseView = styled.View`
+    width: 100px;
+    height: 120px;
+
+    background: #070E3C;
+    border: 0.5px;
+    border-color: #fff;
+
+    border-top-right-radius: 25px;
+    border-bottom-right-radius: 25px;
+    
+    align-items: center;
+    justify-content: center;
+`
+
 export const WayPointsView = styled.View<WayPointViewProps>`
     width: 100%;
     background: #070E3C;
@@ -137,11 +154,8 @@ export const WayPointButton = styled.TouchableOpacity`
     width: 52px;
     height: 52px;
     border-radius: 26px;
-    background: #070E3C;
+    background: #FFC66C;
     bottom: 26px;
-
-    border: 0.5px;
-    border-color: #FFC66C;
 
     align-items: center;
     justify-content: center;
@@ -239,6 +253,7 @@ export const FavoriteLinesView = styled.View`
     background: #070E3C;
     flex: 1;
 
+    padding: 0 16px;
     position: absolute;
 `
 
@@ -252,6 +267,11 @@ export const TitleFavoritesLines = styled.Text`
 `
 
 export const FavoriteLinesList = styled(FlatList as new () => FlatList<string>)`
+    width: 100%;
+    margin-bottom: 24px;
+`
+
+export const HistoryLinesList = styled(FlatList as new () => FlatList<HistoryLinesInterface>)`
     width: 100%;
     margin-bottom: 24px;
 `

@@ -2,7 +2,8 @@ import React, { useState, useCallback, useRef, useEffect } from 'react'
 import { TextInput, FlatList, Text, PermissionsAndroid, Alert } from 'react-native'
 import { Form } from '@unform/mobile'
 import { FormHandles } from '@unform/core'
-import Icon from 'react-native-vector-icons/Feather'
+import IconFeather from 'react-native-vector-icons/Feather'
+import IconMaterial from 'react-native-vector-icons/MaterialIcons'
 import { useNavigation } from '@react-navigation/native'
 import MapView, { PROVIDER_GOOGLE, Marker, Polyline } from 'react-native-maps';
 import { apiBlockPoint, apiRoute } from '../../services/api';
@@ -19,18 +20,21 @@ import {
     BlockPointDatabase,
     GeoLocalization,
     Route,
-    WayPoint
+    WayPoint,
+    HistoryLinesInterface
 } from '../../models/interfaces'
 
 import {
     Container,
     Header,
+    InfoView,
     TouchButton,
     InfoContainer,
     InfoTimeNowText,
     InfoShowWayPointsView,
     InfoTimeNowView,
     InfoTimeRemainingText,
+    InfoCloseView,
     WayPointsView,
     WayPonitTitle,
     WayPointsList,
@@ -51,6 +55,7 @@ import {
     FavoriteLinesList,
     TitleFavoritesLines,
     HistoryLines,
+    HistoryLinesList,
     TouchButtonMarkBlockPoint,
     CreateBlockPointView,
     TitleCreateBlockPoint,
@@ -77,10 +82,11 @@ const Home: React.FC = () => {
     const [routes, setRoutes]  = useState<Route[]>([]);
     const [blockPoints, setBlockPoints] = useState<BlockPoint[]>([])
     const [favoristLines, setFavoriteLines] = useState<string[]>([])
+    const [historyLines, setHistoryLines] = useState<HistoryLinesInterface[]>([])
+    const [routePressed, setRoutePressed] = useState<Route>();
 
     const [wayPoints, setWayPoints] = useState<WayPoint[] | undefined>([]);
     const [searchRoutes, setSearchRoutes] = useState<Route[]>([]);
-    const [routePressed, setRoutePressed] = useState<string>('');
     const [currentLocation, setCurrentLocation] = useState<GeoLocalization>({latitude: -23.703629, longitude: -46.54796,});
 
     const [showWayPoints, setShowWayPoint] = useState(false);
@@ -125,10 +131,6 @@ const Home: React.FC = () => {
 
                 var responseRoutes = await apiRoute.get('routes')
                 setRoutes(responseRoutes.data)
-
-            setFavoriteLines([
-                '5b - Quimicos', '11 - Orquideas','10 - asease', '51b - Quimicos', '101 - Orquideas','110 - asease'
-            ])
         })
         ();
     }, [])
@@ -160,15 +162,19 @@ const Home: React.FC = () => {
         }
     },[searchRoutes])
 
-    const handleShowInfoContainer = useCallback((r) => {
-        console.log(routePressed);
-        console.log(r);
+    const handleShowInfoContainer = useCallback((routePressed) => {
         var route = searchRoutes.find(x => x.routeName == routePressed);
-        console.log(route);
+        setRoutePressed(route);
         setWayPoints(route?.wayPoints);
-        setShowInfoContainer(!showInfoContainer);
+        setShowInfoContainer(true);
         setSearchRoutes([]);
+        setHistoryLines([...historyLines, {routeId: String(v4()),routeName: routePressed}]);
     },[showInfoContainer, searchRoutes])
+
+    const handleCancelRoute = useCallback(() => {
+        setShowInfoContainer(false);
+        setWayPoints([]);
+    },[])
 
     const createBlockPoint = useCallback((data: string) => {
         (async function(){
@@ -244,7 +250,7 @@ const Home: React.FC = () => {
         </MapView>  
         <Container>
             <Header>
-                <Form ref={formRef} onSubmit={handleShowInfoContainer}>
+                <Form ref={formRef} onSubmit={() => {}}>
                     <Input 
                         name="search"
                         icon="map"
@@ -261,8 +267,7 @@ const Home: React.FC = () => {
                             <SearchWayPointView>
                                 <SearchWayPointTouchButton 
                                     onPress={() => {
-                                            setRoutePressed(item.routeName);
-                                            formRef.current?.submitForm();
+                                            handleShowInfoContainer(item.routeName);
                                         }
                                 }>
                                 <SearchWayPonitText ref={TextRef}>{item.routeName}</SearchWayPonitText>
@@ -274,38 +279,48 @@ const Home: React.FC = () => {
                 <TouchButton onPress={() => {
                     setShowFavoritsList(true);
                 }}>
-                    <Icon name="star" size={26} color="#FFC66C"/>
+                    <IconMaterial name="star" size={26} color="#FFC66C"/>
                 </TouchButton>
                 <TouchButtonMarkBlockPoint onPress={() => {
                     setShowCreateBlockPoint(true);
                 }}>
-                    <Icon name="map-pin" size={26} color="#FFC66C"/>
+                    <IconMaterial name='wrong-location' size={26} color="#FFC66C"/>
                 </TouchButtonMarkBlockPoint>
             </Header>
         </Container>
+
+
         {showInfoContainer && (
-            <>
+            <InfoView>
                 <InfoContainer showInfoContainer={showInfoContainer}>
                     <InfoShowWayPointsView>
-                        <TouchButton onPress={handleWayPoints}>
-                            <Icon name="map-pin" size={40} color="#FFC66C"/>
+                        <TouchButton style={{backgroundColor: '#FFC66C'}} onPress={handleWayPoints}>
+                            <IconMaterial name="directions-bus" size={40} color="#000"/>
                         </TouchButton>
                     </InfoShowWayPointsView>
                     <InfoTimeNowView>
-                        <InfoTimeNowText>Previsão de chegada: 10h30</InfoTimeNowText>
+                        <InfoTimeNowText>Linha: {routePressed?.routeName}</InfoTimeNowText>
                         <InfoTimeRemainingText>Distancia: 30m</InfoTimeRemainingText>
-                    </InfoTimeNowView>      
+                    </InfoTimeNowView> 
+                    <InfoCloseView>
+                        <TouchButton 
+                            onPress={handleCancelRoute}
+                            style={{backgroundColor: '#FFC66C'}}
+                        >
+                            <IconMaterial name="close" size={26}/>
+                        </TouchButton>
+                    </InfoCloseView>   
                 </InfoContainer>  
                         
                 <WayPointsView showWayPoints={showWayPoints}>     
                     <WayPointButton onPress={handleWayPoints}>
-                        <Icon name="arrow-down" size={26} color="#FFC66C"/>
+                        <IconFeather name="arrow-down" size={26} color="#000"/>
                     </WayPointButton>
                     <TitlesView>
                         <WayPointTitleTimeArive>18h60</WayPointTitleTimeArive>
                         <SubViewTitles>
                             <WayPonitTitleDistance>Direção</WayPonitTitleDistance>
-                            <WayPonitTitleName>Quimicos</WayPonitTitleName>
+                            <WayPonitTitleName>{routePressed?.routeName}</WayPonitTitleName>
                         </SubViewTitles>
                     </TitlesView>
                     <WayPointsList
@@ -314,43 +329,56 @@ const Home: React.FC = () => {
                         renderItem={({item}) => (
                                 <WayPointView>
                                     <IconCheckView>
-                                        <Icon name="check" size={18} color="#fff"/>
+                                        <IconFeather name="check" size={18} color="#fff"/>
                                     </IconCheckView>
                                     <WayPonitText>{item.pointName}</WayPonitText>
                                 </WayPointView>
                         )}
                     />
                 </WayPointsView>
-            </>
+            </InfoView>
         )}
         
+
         {showFavoritsList && (
             <FavoriteLinesView>
-                <TouchButton onPress={() => setShowFavoritsList(false)}>
-                    <Icon name="arrow-left" size={26} color="#fff"/>
-                </TouchButton>
+                <TouchButtonExitCreateBlockPoint onPress={() => setShowFavoritsList(false)}>
+                    <IconFeather name="arrow-left" size={26} color="#000"/>
+                </TouchButtonExitCreateBlockPoint>
                 <TitleFavoritesLines>Linhas Favoritas</TitleFavoritesLines>
                 <FavoriteLinesList
                     data={favoristLines}
                     keyExtractor={(favoristLines) => favoristLines}
                     renderItem={({item}) => (
                             <WayPointView>
-                                    <Icon name="star" size={18} color="#fff"/>
+                                    <IconFeather name="star" size={18} color="#FFC66C"/>
                                 <WayPonitText>{item}</WayPonitText>
                             </WayPointView>
                     )}
                 />
                 <HistoryLines>
                     <TitleFavoritesLines>Histórico de Linhas</TitleFavoritesLines>
+                    <HistoryLinesList
+                        data={historyLines}
+                        keyExtractor={(historyLines) => historyLines.routeId}
+                        renderItem={({item}) => (
+                                <WayPointView>
+                                        <IconFeather name="star" size={18} color="#FFC66C"/>
+                                    <WayPonitText>{item.routeName}</WayPonitText>
+                                </WayPointView>
+                        )}
+                    />
                 </HistoryLines>
             </FavoriteLinesView>
         )}
+
+
         {showCreateBlockPoint && (
             <CreateBlockPointView>
                 <TouchButtonExitCreateBlockPoint onPress={() => setShowCreateBlockPoint(false)}>
-                    <Icon name="arrow-left" size={26} color="#000"/>
+                    <IconFeather name="arrow-left" size={26} color="#000"/>
                 </TouchButtonExitCreateBlockPoint>
-                <TitleCreateBlockPoint>Criar Ponto Bloqueante na sua localização</TitleCreateBlockPoint>
+                <TitleCreateBlockPoint>Reportar Ponto Bloqueante na sua localização</TitleCreateBlockPoint>
                 <Form ref={formRef} onSubmit={createBlockPoint}>
                     <TitleDescriptionBlockPoint>Latitude</TitleDescriptionBlockPoint>
                     <Input
@@ -358,6 +386,7 @@ const Home: React.FC = () => {
                         icon="navigation-2"
                         value={String(currentLocation.latitude)}
                         defaultValue={String(currentLocation.latitude)}
+                        editable={false}
                         ref={createBlockPointLatitudeInputRef}
                     />
                     <TitleDescriptionBlockPoint>Longitude</TitleDescriptionBlockPoint>
@@ -366,6 +395,7 @@ const Home: React.FC = () => {
                         icon="navigation-2"
                         value={String(currentLocation.longitude)}
                         defaultValue={String(currentLocation.longitude)}
+                        editable={false}
                         ref={createBlockPointLongitudeInputRef}
                     />
                     <TitleDescriptionBlockPoint>Descrição</TitleDescriptionBlockPoint>

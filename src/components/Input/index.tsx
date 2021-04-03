@@ -61,7 +61,12 @@ const Input: React.ForwardRefRenderFunction<InputRef ,InputProps> = (
                 inputElementRef.current.clear();
             }
         })
-        inputValueRef.current.value = value
+
+        console.log(value)
+        if (value != undefined){
+            inputValueRef.current.value = value;
+            setIsFilled(true);
+        }
     },[fieldName, registerField])
     
     return (

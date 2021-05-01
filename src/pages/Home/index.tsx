@@ -13,6 +13,7 @@ import { v4 } from 'react-native-uuid';
 import Dialog from 'react-native-dialog';
 import AsyncStorage from '@react-native-community/async-storage'
 import messaging from '@react-native-firebase/messaging';
+import { map_style } from './MapStyle/styles'
 
 import Input from '../../components/Input';
 import Button from '../../components/Button';
@@ -284,6 +285,7 @@ const Home: React.FC = () => {
             showsMyLocationButton={true}
             provider={PROVIDER_GOOGLE}
             style={mapStyles.map}
+            customMapStyle={map_style}
             region={{
                 latitude: currentLocation.latitude,
                 longitude: currentLocation.longitude,

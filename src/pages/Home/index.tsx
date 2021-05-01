@@ -1,19 +1,21 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react'
-import { TextInput, FlatList, Text, PermissionsAndroid, Alert } from 'react-native'
-import { Form } from '@unform/mobile'
-import { FormHandles } from '@unform/core'
-import IconFeather from 'react-native-vector-icons/Feather'
-import IconMaterial from 'react-native-vector-icons/MaterialIcons'
-import { useNavigation } from '@react-navigation/native'
+import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { TextInput, FlatList, Text, PermissionsAndroid, Alert } from 'react-native';
+import { Form } from '@unform/mobile';
+import { FormHandles } from '@unform/core';
+import IconFeather from 'react-native-vector-icons/Feather';
+import IconMaterial from 'react-native-vector-icons/MaterialIcons';
+import { useNavigation } from '@react-navigation/native';
 import MapView, { PROVIDER_GOOGLE, Marker, Polyline } from 'react-native-maps';
 import { apiBlockPoint, apiRoute } from '../../services/api';
-import { StyleSheet } from 'react-native'
-import Geolocation from '@react-native-community/geolocation'
-import { v4 } from 'react-native-uuid'
+import { StyleSheet } from 'react-native';
+import Geolocation from '@react-native-community/geolocation';
+import { v4 } from 'react-native-uuid';
 import Dialog from 'react-native-dialog';
+import AsyncStorage from '@react-native-community/async-storage'
+import messaging from '@react-native-firebase/messaging';
 
-import Input from '../../components/Input'
-import Button from '../../components/Button'
+import Input from '../../components/Input';
+import Button from '../../components/Button';
 
 import {
     BlockPoint,
@@ -21,7 +23,7 @@ import {
     GeoLocalization,
     Route,
     WayPoint,
-    HistoryLinesInterface
+    LinesInterface
 } from '../../models/interfaces'
 
 import {
@@ -81,8 +83,8 @@ const Home: React.FC = () => {
 
     const [routes, setRoutes]  = useState<Route[]>([]);
     const [blockPoints, setBlockPoints] = useState<BlockPoint[]>([])
-    const [favoristLines, setFavoriteLines] = useState<string[]>([])
-    const [historyLines, setHistoryLines] = useState<HistoryLinesInterface[]>([])
+    const [favoritesLines, setFavoritesLines] = useState<LinesInterface[]>([])
+    const [historyLines, setHistoryLines] = useState<LinesInterface[]>([])
     const [routePressed, setRoutePressed] = useState<Route>();
 
     const [wayPoints, setWayPoints] = useState<WayPoint[] | undefined>([]);
@@ -95,6 +97,7 @@ const Home: React.FC = () => {
     const [showCreateBlockPoint, setShowCreateBlockPoint] = useState(false);
     const [showCreateBlockPointDialog, setShowCreateBlockPointDialog] = useState(false);
 
+    const TextRouteNameRef = useRef<Text>(null);
     const TextRef = useRef<Text>(null);
     const flatListRef = useRef<FlatList>(null);
     const formRef = useRef<FormHandles>(null);
@@ -102,35 +105,72 @@ const Home: React.FC = () => {
     const createBlockPointDescriptionInputRef = useRef<TextInput>(null);
     const createBlockPointLatitudeInputRef = useRef<TextInput>(null);
     const createBlockPointLongitudeInputRef = useRef<TextInput>(null);
-    const navigation = useNavigation();
+    //const navigation = useNavigation();
+
+    useEffect(()=> {
+        messaging().subscribeToTopic('incidents_opened').then((response) => {
+            console.log(response);            
+        });
+
+        messaging().subscribeToTopic('incidents_closed').then((response) => {
+            console.log(response);            
+        });
+
+        const subscribe = messaging().onMessage(async remoteMessage => {
+            console.log(remoteMessage);
+            console.log('TESTE 1');
+            Alert.alert('Aviso !', 'Recalculando Rota');
+          });
+
+        return subscribe;
+    },[])
 
     useEffect(() => {
             (async function() {
                 const granted = await PermissionsAndroid.request(
                     PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
                     {
-                    title: "Smart Traffic App Permission",
-                    message:
-                        "Smart Traffic App needs access your Location ",
-                    buttonNeutral: "Ask Me Later",
-                    buttonNegative: "Cancel",
-                    buttonPositive: "OK"
+                        title: "Smart Traffic App Permission",
+                        message:
+                            "Smart Traffic App needs access your Location ",
+                        buttonNeutral: "Ask Me Later",
+                        buttonNegative: "Cancel",
+                        buttonPositive: "OK"
                     }
                 );
 
-                Geolocation.getCurrentPosition(infos => {
-                    setCurrentLocation({
-                        latitude: infos.coords.latitude,
-                        longitude: infos.coords.longitude
+                if (granted == "granted"){
+                    Geolocation.getCurrentPosition(infos => {
+                        setCurrentLocation({
+                            latitude: infos.coords.latitude,
+                            longitude: infos.coords.longitude
+                        })
                     })
-                })
-
+                };
+                
                 var responseBlockPoint = await apiBlockPoint.get('api/incident');
+                setBlockPoints(responseBlockPoint.data);
 
-                setBlockPoints(responseBlockPoint.data)
+                var responseRoutes = await apiRoute.get('routes');
+                setRoutes(responseRoutes.data);
 
-                var responseRoutes = await apiRoute.get('routes')
-                setRoutes(responseRoutes.data)
+                let hasLine = true;
+                let count = 1;
+
+                while (hasLine){
+                    const routeName = await AsyncStorage.getItem('@FavoriteLines:' + String(count));
+                    if (!routeName){
+                        hasLine = false;
+                    }
+                    else {
+                        const line: LinesInterface = {
+                            routeId: String(v4()),
+                            routeName: routeName,
+                        }
+                        setFavoritesLines([...favoritesLines, line])
+                    }
+                    count++;
+                }
         })
         ();
     }, [])
@@ -152,8 +192,7 @@ const Home: React.FC = () => {
     },[showWayPoints, wayPoints])
 
     const search = useCallback((data: string) => {
-        var values = routes.filter(x => x.routeName.toUpperCase().includes(data.toUpperCase()));
-        console.log(data)
+        var values = routes.filter(x => x.name.toUpperCase().includes(data.toUpperCase()));
         if (data.length == 0){
             setSearchRoutes([]);
         }
@@ -163,18 +202,39 @@ const Home: React.FC = () => {
     },[searchRoutes])
 
     const handleShowInfoContainer = useCallback((routePressed) => {
-        var route = searchRoutes.find(x => x.routeName == routePressed);
+        var route = searchRoutes.find(x => x.name == routePressed);
         setRoutePressed(route);
-        setWayPoints(route?.wayPoints);
+        setWayPoints(route?.waypoints);
         setShowInfoContainer(true);
         setSearchRoutes([]);
         setHistoryLines([...historyLines, {routeId: String(v4()),routeName: routePressed}]);
-    },[showInfoContainer, searchRoutes])
+    },[showInfoContainer, searchRoutes, routePressed])
 
     const handleCancelRoute = useCallback(() => {
         setShowInfoContainer(false);
         setWayPoints([]);
     },[])
+
+    const handleSetFavoriteLines = useCallback((data) => {(
+        async function () {
+            let count = 1;
+            const routeName = (TextRouteNameRef.current._internalFiberInstanceHandleDEV.child.memoizedProps);
+            var favoriteLinesCache: LinesInterface = {
+                routeId: String(v4()),
+                routeName: String(routeName)
+            }
+            setFavoritesLines([...favoritesLines, favoriteLinesCache]);
+
+            favoritesLines.forEach(line => {
+                (async function (){
+                    await AsyncStorage.setItem('@FavoriteLines:' + String(count), line.routeName);
+                    count++;
+                })
+                ();
+            });
+        }
+        ()
+    )},[favoritesLines])
 
     const createBlockPoint = useCallback((data: string) => {
         (async function(){
@@ -204,7 +264,7 @@ const Home: React.FC = () => {
 
             setBlockPoints([...blockPoints, blockPoint])
 
-            Alert.alert("Ponto bloqueante criado com sucesso !")
+            Alert.alert("Sucesso !","Ponto bloqueante criado na sua localização")
 
             setShowCreateBlockPoint(false);
         })
@@ -231,12 +291,29 @@ const Home: React.FC = () => {
                 longitudeDelta: 0.0121,
                 }}
             >
-            {/* <Polyline
-                coordinates={}
-                strokeColor="#ff9000"
-                fillColor="#ff9000"
+            <Polyline
+                coordinates={[
+                    {
+                        latitude: -23.695036,
+                        longitude: -46.550052
+                    },
+                    {
+                        latitude: -23.710285,
+                        longitude: -46.553201
+                    },
+                    {
+                        latitude: -23.715068,
+                        longitude: -46.551844
+                    },
+                    {
+                        latitude: -23.703629,
+                        longitude: -46.54796
+                    }
+            ]}
+                strokeColor="#c5ff"
+                fillColor="#c5ff"
                 strokeWidth={4}
-            /> */}
+            />
             {blockPoints.map(marker => (
                 <Marker
                     coordinate={{
@@ -262,15 +339,15 @@ const Home: React.FC = () => {
                     <SearchWayPointsList
                         ref={flatListRef}
                         data={searchRoutes}
-                        keyExtractor={(searchRoutes) => searchRoutes.routeName}
+                        keyExtractor={(searchRoutes) => searchRoutes.name}
                         renderItem={({item}) => (
                             <SearchWayPointView>
                                 <SearchWayPointTouchButton 
                                     onPress={() => {
-                                            handleShowInfoContainer(item.routeName);
+                                            handleShowInfoContainer(item.name);
                                         }
                                 }>
-                                <SearchWayPonitText ref={TextRef}>{item.routeName}</SearchWayPonitText>
+                                <SearchWayPonitText ref={TextRef}>{item.name}</SearchWayPonitText>
                                 </SearchWayPointTouchButton>
                             </SearchWayPointView>
                         )}
@@ -299,15 +376,15 @@ const Home: React.FC = () => {
                         </TouchButton>
                     </InfoShowWayPointsView>
                     <InfoTimeNowView>
-                        <InfoTimeNowText>Linha: {routePressed?.routeName}</InfoTimeNowText>
+                        <InfoTimeNowText>Linha: {routePressed?.name}</InfoTimeNowText>
                         <InfoTimeRemainingText>Distancia: 30m</InfoTimeRemainingText>
                     </InfoTimeNowView> 
                     <InfoCloseView>
                         <TouchButton 
-                            onPress={handleCancelRoute}
+                            onPress={handleSetFavoriteLines}
                             style={{backgroundColor: '#FFC66C'}}
                         >
-                            <IconMaterial name="close" size={26}/>
+                            <IconMaterial name="star" size={26}/>
                         </TouchButton>
                     </InfoCloseView>   
                 </InfoContainer>  
@@ -320,18 +397,18 @@ const Home: React.FC = () => {
                         <WayPointTitleTimeArive>18h60</WayPointTitleTimeArive>
                         <SubViewTitles>
                             <WayPonitTitleDistance>Direção</WayPonitTitleDistance>
-                            <WayPonitTitleName>{routePressed?.routeName}</WayPonitTitleName>
+                            <WayPonitTitleName ref={TextRouteNameRef}>{routePressed?.name}</WayPonitTitleName>
                         </SubViewTitles>
                     </TitlesView>
                     <WayPointsList
                         data={wayPoints}
-                        keyExtractor={(wayPoints) => wayPoints.pointName}
+                        keyExtractor={(wayPoints) => wayPoints.id_waypoint}
                         renderItem={({item}) => (
                                 <WayPointView>
                                     <IconCheckView>
                                         <IconFeather name="check" size={18} color="#fff"/>
                                     </IconCheckView>
-                                    <WayPonitText>{item.pointName}</WayPonitText>
+                                    <WayPonitText>{item.name_waypoint}</WayPonitText>
                                 </WayPointView>
                         )}
                     />
@@ -347,12 +424,12 @@ const Home: React.FC = () => {
                 </TouchButtonExitCreateBlockPoint>
                 <TitleFavoritesLines>Linhas Favoritas</TitleFavoritesLines>
                 <FavoriteLinesList
-                    data={favoristLines}
-                    keyExtractor={(favoristLines) => favoristLines}
+                    data={favoritesLines}
+                    keyExtractor={(favoritesLines) => favoritesLines.routeId}
                     renderItem={({item}) => (
                             <WayPointView>
                                     <IconFeather name="star" size={18} color="#FFC66C"/>
-                                <WayPonitText>{item}</WayPonitText>
+                                <WayPonitText>{item.routeName}</WayPonitText>
                             </WayPointView>
                     )}
                 />

@@ -1,6 +1,6 @@
 import styled, {css} from 'styled-components/native'
 import {FlatList} from 'react-native'
-import {WayPoint, Route, HistoryLinesInterface} from '../../models/interfaces'
+import {WayPoint, Route, LinesInterface} from '../../models/interfaces'
 
 interface WayPointViewProps {
     showWayPoints: boolean;
@@ -266,12 +266,12 @@ export const TitleFavoritesLines = styled.Text`
     margin-top: 8px;
 `
 
-export const FavoriteLinesList = styled(FlatList as new () => FlatList<string>)`
+export const FavoriteLinesList = styled(FlatList as new () => FlatList<LinesInterface>)`
     width: 100%;
     margin-bottom: 24px;
 `
 
-export const HistoryLinesList = styled(FlatList as new () => FlatList<HistoryLinesInterface>)`
+export const HistoryLinesList = styled(FlatList as new () => FlatList<LinesInterface>)`
     width: 100%;
     margin-bottom: 24px;
 `

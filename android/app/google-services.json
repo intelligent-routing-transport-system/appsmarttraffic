@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "372931987781",
+    "project_id": "tcc-notificator-38bc1",
+    "storage_bucket": "tcc-notificator-38bc1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:372931987781:android:cda91e8847d0a144e7d62c",
+        "android_client_info": {
+          "package_name": "com.smarttrafficapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "372931987781-315r8vqltanth11fav0esh236e8sg5t2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA2s5fddlRkfMWYXfvKkm4_PVMVh6gd_j8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "372931987781-315r8vqltanth11fav0esh236e8sg5t2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

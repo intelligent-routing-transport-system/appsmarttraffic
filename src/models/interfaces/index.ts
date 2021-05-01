@@ -23,16 +23,23 @@ export interface GeoLocalization{
 }
 
 export interface WayPoint {
-    pointName: string;
+    _id: string;
+    id_waypoint: string;
+    name_waypoint: string;
 }
 
 export interface Route {
-    routeId: number;
-    routeName: string;
-    wayPoints: WayPoint[];
+    _id: string;
+    id: string;
+    name: string;
+    waypoints: [{
+        _id: string;
+        id_waypoint: string;
+        name_waypoint: string;
+    }];
 }
 
-export interface HistoryLinesInterface {
+export interface LinesInterface {
     routeName: string;
     routeId: string;
 }

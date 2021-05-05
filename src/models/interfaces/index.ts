@@ -9,11 +9,10 @@ export interface BlockPointDatabase {
 
 export interface BlockPoint {
     _id: string;
-    loc:{
-        type: string
-        coordinates: [number, number];
+    coords:{
+        latitude: number;
+        longitude: number;
     }
-    category: string;
     description: string;
 }
 
@@ -30,7 +29,6 @@ export interface WayPoint {
 
 export interface Route {
     _id: string;
-    id: string;
     name: string;
     waypoints: [{
         _id: string;
@@ -42,4 +40,9 @@ export interface Route {
 export interface LinesInterface {
     routeName: string;
     routeId: string;
+}
+
+export interface RouteGeoLocation {
+    latitude: number,
+    longitude: number
 }

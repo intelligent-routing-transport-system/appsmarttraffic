@@ -80,6 +80,7 @@ export const InfoTimeNowView = styled.View`
     background: #070E3C;
 
     border-width: 0.5px;
+    border-color: #fff;
 
     flex: 1;
 `
@@ -326,4 +327,8 @@ export const TouchButtonExitCreateBlockPoint = styled.TouchableOpacity`
     justify-content: center;  
 
     margin-top: 16px;
+`
+
+export const ExitButton = styled.View`
+    align-items: center;
 `

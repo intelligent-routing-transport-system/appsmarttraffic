@@ -6,25 +6,25 @@ import IconFeather from 'react-native-vector-icons/Feather';
 import IconMaterial from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import MapView, { PROVIDER_GOOGLE, Marker, Polyline } from 'react-native-maps';
-import { apiBlockPoint, apiRoute } from '../../services/api';
+import { apiRoute } from '../../services/api';
 import { StyleSheet } from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
 import { v4 } from 'react-native-uuid';
 import Dialog from 'react-native-dialog';
 import AsyncStorage from '@react-native-community/async-storage'
 import messaging from '@react-native-firebase/messaging';
-import { map_style } from './MapStyle/styles'
+import map_style from './MapStyle/styles';
 
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 
 import {
-    BlockPoint,
-    BlockPointDatabase,
+    BlockPoint,    
     GeoLocalization,
     Route,
     WayPoint,
-    LinesInterface
+    LinesInterface,
+    RouteGeoLocation
 } from '../../models/interfaces'
 
 import {
@@ -39,7 +39,6 @@ import {
     InfoTimeRemainingText,
     InfoCloseView,
     WayPointsView,
-    WayPonitTitle,
     WayPointsList,
     WayPointButton,
     WayPointView,
@@ -63,9 +62,8 @@ import {
     CreateBlockPointView,
     TitleCreateBlockPoint,
     TitleDescriptionBlockPoint,
-    BlockPointLocationView,
-    TouchButtonExitCreateBlockPoint
-
+    TouchButtonExitCreateBlockPoint,
+    ExitButton
 } from './styles'
 
 const Home: React.FC = () => {
@@ -91,6 +89,7 @@ const Home: React.FC = () => {
     const [wayPoints, setWayPoints] = useState<WayPoint[] | undefined>([]);
     const [searchRoutes, setSearchRoutes] = useState<Route[]>([]);
     const [currentLocation, setCurrentLocation] = useState<GeoLocalization>({latitude: -23.703629, longitude: -46.54796,});
+    const [routeGeoLocation, setRouteGeoLocation] = useState<RouteGeoLocation[]>([]);
 
     const [showWayPoints, setShowWayPoint] = useState(false);
     const [showInfoContainer, setShowInfoContainer] = useState(false);
@@ -109,17 +108,12 @@ const Home: React.FC = () => {
     //const navigation = useNavigation();
 
     useEffect(()=> {
-        messaging().subscribeToTopic('incidents_opened').then((response) => {
-            console.log(response);            
-        });
-
-        messaging().subscribeToTopic('incidents_closed').then((response) => {
+        messaging().subscribeToTopic('INCIDENTS').then((response) => {
             console.log(response);            
         });
 
         const subscribe = messaging().onMessage(async remoteMessage => {
             console.log(remoteMessage);
-            console.log('TESTE 1');
             Alert.alert('Aviso !', 'Recalculando Rota');
           });
 
@@ -148,11 +142,8 @@ const Home: React.FC = () => {
                         })
                     })
                 };
-                
-                var responseBlockPoint = await apiBlockPoint.get('api/incident');
-                setBlockPoints(responseBlockPoint.data);
 
-                var responseRoutes = await apiRoute.get('routes');
+                var responseRoutes = await apiRoute.get('api/route/getRoutes');
                 setRoutes(responseRoutes.data);
 
                 let hasLine = true;
@@ -172,7 +163,7 @@ const Home: React.FC = () => {
                     }
                     count++;
                 }
-        })
+            })
         ();
     }, [])
 
@@ -202,18 +193,53 @@ const Home: React.FC = () => {
         }
     },[searchRoutes])
 
-    const handleShowInfoContainer = useCallback((routePressed) => {
-        var route = searchRoutes.find(x => x.name == routePressed);
-        setRoutePressed(route);
-        setWayPoints(route?.waypoints);
-        setShowInfoContainer(true);
-        setSearchRoutes([]);
-        setHistoryLines([...historyLines, {routeId: String(v4()),routeName: routePressed}]);
-    },[showInfoContainer, searchRoutes, routePressed])
+    const handleShowInfoContainer = useCallback((routePressed) => {(
+        async function () {
+            var route = searchRoutes.find(x => x.name == routePressed);
+            var locations: RouteGeoLocation[] = [];
+
+            setRoutePressed(route);
+            setWayPoints(route?.waypoints);
+
+            var response_data = (await apiRoute.get('api/route/' + route?._id)).data;
+
+            response_data.incidents.map((i) => {
+                var blockpoint: BlockPoint = {
+                    _id: i._id,
+                    coords: {
+                        latitude: i.Coords.Latitude,
+                        longitude: i.Coords.Longitude
+                    },
+                    description: i._id
+                }
+                setBlockPoints([...blockPoints, blockpoint]);
+            });
+
+            response_data.route.map((r) => {
+                console.log(r.latitude);
+                console.log(r.longitude);
+
+                var aux: RouteGeoLocation = {
+                    latitude: r.latitude,
+                    longitude: r.longitude,
+                }
+                locations.push(aux);
+            })
+
+            setRouteGeoLocation(locations);
+
+            setShowInfoContainer(true);
+            setSearchRoutes([]);
+            setHistoryLines([...historyLines, {routeId: String(v4()),routeName: routePressed}]);
+        }
+        ()
+    )},[showInfoContainer, searchRoutes, routePressed])
 
     const handleCancelRoute = useCallback(() => {
         setShowInfoContainer(false);
+        setBlockPoints([]);
         setWayPoints([]);
+        setRouteGeoLocation([]);
     },[])
 
     const handleSetFavoriteLines = useCallback((data) => {(
@@ -239,35 +265,34 @@ const Home: React.FC = () => {
 
     const createBlockPoint = useCallback((data: string) => {
         (async function(){
-            var blockPointDatabase: BlockPointDatabase = {
-                category: "traffic_accident",
-                description: data["block-point-description"],
-                loc: {
-                    coordinates:[
-                        Number(data["block-point-latitude"]),
-                        Number(data["block-point-longitude"])
-                    ],
-                    type: "Point"
-                }
-            }
+            // var blockPointDatabase: BlockPointDatabase = {
+            //     category: "traffic_accident",
+            //     description: data["block-point-description"],
+            //     loc: {
+            //         coordinates:[
+            //             Number(data["block-point-latitude"]),
+            //             Number(data["block-point-longitude"])
+            //         ],
+            //         type: "Point"
+            //     }
+            // }
 
-            await apiBlockPoint.post('api/incident/register', blockPointDatabase)
+            // await apiBlockPoint.post('api/incident/register', blockPointDatabase)
 
-            var blockPoint: BlockPoint = {
-                _id: String(v4()),
-                category: blockPointDatabase.category,
-                description: blockPointDatabase.description,
-                loc: {
-                    coordinates: blockPointDatabase.loc.coordinates,
-                    type: blockPointDatabase.loc.type,
-                }
-            } 
+            // var blockPoint: BlockPoint = {
+            //     _id: String(v4()),
+            //     description: blockPointDatabase.description,
+            //     loc: {
+            //         coordinates: blockPointDatabase.loc.coordinates,
+            //         type: blockPointDatabase.loc.type,
+            //     }
+            // } 
 
-            setBlockPoints([...blockPoints, blockPoint])
+            // setBlockPoints([...blockPoints, blockPoint])
 
-            Alert.alert("Sucesso !","Ponto bloqueante criado na sua localização")
+            // Alert.alert("Sucesso !","Ponto bloqueante criado na sua localização")
 
-            setShowCreateBlockPoint(false);
+            // setShowCreateBlockPoint(false);
         })
         ()
     },[showCreateBlockPoint])
@@ -287,31 +312,14 @@ const Home: React.FC = () => {
             style={mapStyles.map}
             customMapStyle={map_style}
             region={{
-                latitude: currentLocation.latitude,
-                longitude: currentLocation.longitude,
+                latitude: -23.695238653751492,//currentLocation.latitude,
+                longitude: -46.5438568358073,//currentLocation.longitude,
                 latitudeDelta: 0.015,
                 longitudeDelta: 0.0121,
                 }}
             >
             <Polyline
-                coordinates={[
-                    {
-                        latitude: -23.695036,
-                        longitude: -46.550052
-                    },
-                    {
-                        latitude: -23.710285,
-                        longitude: -46.553201
-                    },
-                    {
-                        latitude: -23.715068,
-                        longitude: -46.551844
-                    },
-                    {
-                        latitude: -23.703629,
-                        longitude: -46.54796
-                    }
-            ]}
+                coordinates={routeGeoLocation}
                 strokeColor="#c5ff"
                 fillColor="#c5ff"
                 strokeWidth={4}
@@ -319,8 +327,8 @@ const Home: React.FC = () => {
             {blockPoints.map(marker => (
                 <Marker
                     coordinate={{
-                        latitude: marker.loc.coordinates[0],
-                        longitude: marker.loc.coordinates[1]
+                        latitude: marker.coords.latitude,
+                        longitude: marker.coords.longitude
                     }}
                     title={marker.description}
                     key={marker._id}
@@ -378,8 +386,16 @@ const Home: React.FC = () => {
                         </TouchButton>
                     </InfoShowWayPointsView>
                     <InfoTimeNowView>
+                        <ExitButton>
+                            <TouchButton 
+                                onPress={handleCancelRoute} 
+                                style={{backgroundColor: "#FFC66C", position: 'absolute', bottom: 10}}
+                            >
+                                <IconMaterial name="close" size={26}/>
+                            </TouchButton>
+                        </ExitButton>
                         <InfoTimeNowText>Linha: {routePressed?.name}</InfoTimeNowText>
-                        <InfoTimeRemainingText>Distancia: 30m</InfoTimeRemainingText>
+                    <InfoTimeRemainingText>Distancia: 30m</InfoTimeRemainingText>
                     </InfoTimeNowView> 
                     <InfoCloseView>
                         <TouchButton 
@@ -408,7 +424,7 @@ const Home: React.FC = () => {
                         renderItem={({item}) => (
                                 <WayPointView>
                                     <IconCheckView>
-                                        <IconFeather name="check" size={18} color="#fff"/>
+                                        <IconFeather name="check" size={18} color="#000"/>
                                     </IconCheckView>
                                     <WayPonitText>{item.name_waypoint}</WayPonitText>
                                 </WayPointView>

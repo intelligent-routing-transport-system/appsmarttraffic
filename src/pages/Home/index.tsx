@@ -113,8 +113,44 @@ const Home: React.FC = () => {
         });
 
         const subscribe = messaging().onMessage(async remoteMessage => {
-            console.log(remoteMessage);
-            Alert.alert('Aviso !', 'Recalculando Rota');
+            //console.log(remoteMessage.notification?.body);
+            var string_json = String(remoteMessage.notification?.body);
+            var json = JSON.parse(string_json);
+
+            var route_pressed = await AsyncStorage.getItem('@RoutePressed');
+            await AsyncStorage.removeItem('@RoutePressed');
+
+            var id = json.routeIdentifier.find(x => x == route_pressed);
+            var locations: RouteGeoLocation[] = [];
+
+            if (route_pressed && id){
+                Alert.alert('Aviso !', 'Recalculando Rota');
+                var response_data = (await apiRoute.get('api/route/' + id)).data;
+
+                console.log(routes);
+
+                response_data.route.map((r) => {
+                    var aux: RouteGeoLocation = {
+                        latitude: r.latitude,
+                        longitude: r.longitude,
+                    }
+                    locations.push(aux);
+                });
+
+                response_data.incidents.map((i) => {
+                    var blockpoint: BlockPoint = {
+                        _id: i._id,
+                        coords: {
+                            latitude: i.Coords.Latitude,
+                            longitude: i.Coords.Longitude
+                        },
+                        description: i._id
+                    }
+                    setBlockPoints([...blockPoints, blockpoint]);
+                });
+
+                setRouteGeoLocation(locations);
+            }
           });
 
         return subscribe;
@@ -201,6 +237,8 @@ const Home: React.FC = () => {
             setRoutePressed(route);
             setWayPoints(route?.waypoints);
 
+            await AsyncStorage.setItem('@RoutePressed', String(route?._id));
+
             var response_data = (await apiRoute.get('api/route/' + route?._id)).data;
 
             response_data.incidents.map((i) => {
@@ -216,9 +254,6 @@ const Home: React.FC = () => {
             });
 
             response_data.route.map((r) => {
-                console.log(r.latitude);
-                console.log(r.longitude);
-
                 var aux: RouteGeoLocation = {
                     latitude: r.latitude,
                     longitude: r.longitude,
@@ -228,9 +263,15 @@ const Home: React.FC = () => {
 
             setRouteGeoLocation(locations);
 
+            setCurrentLocation({
+                latitude: response_data.route[0].latitude,
+                longitude: response_data.route[0].longitude,
+            })
+
             setShowInfoContainer(true);
             setSearchRoutes([]);
             setHistoryLines([...historyLines, {routeId: String(v4()),routeName: routePressed}]);
+            console.log(routes);
         }
         ()
     )},[showInfoContainer, searchRoutes, routePressed])
@@ -312,10 +353,10 @@ const Home: React.FC = () => {
             style={mapStyles.map}
             customMapStyle={map_style}
             region={{
-                latitude: -23.695238653751492,//currentLocation.latitude,
-                longitude: -46.5438568358073,//currentLocation.longitude,
-                latitudeDelta: 0.015,
-                longitudeDelta: 0.0121,
+                    latitude: currentLocation.latitude,
+                    longitude: currentLocation.longitude,
+                    latitudeDelta: 0.015,
+                    longitudeDelta: 0.0121,
                 }}
             >
             <Polyline
@@ -420,7 +461,7 @@ const Home: React.FC = () => {
                     </TitlesView>
                     <WayPointsList
                         data={wayPoints}
-                        keyExtractor={(wayPoints) => wayPoints.id_waypoint}
+                        keyExtractor={(wayPoints) => wayPoints.name_waypoint}
                         renderItem={({item}) => (
                                 <WayPointView>
                                     <IconCheckView>

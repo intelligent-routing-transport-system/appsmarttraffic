@@ -1,6 +1,6 @@
-import styled, {css} from 'styled-components/native'
-import {FlatList} from 'react-native'
-import {WayPoint, Route, LinesInterface} from '../../models/interfaces'
+import styled, { css } from 'styled-components/native'
+import { FlatList } from 'react-native'
+import { WayPoint, Route, LinesInterface } from '../../models/interfaces'
 
 interface WayPointViewProps {
     showWayPoints: boolean;
@@ -85,11 +85,12 @@ export const InfoTimeNowView = styled.View`
     flex: 1;
 `
 
-export const InfoTimeNowText = styled.Text`
-    font-size: 18px;
+export const InfoWaypointText = styled.Text`
+    font-size: 14px;
     font-family: 'RobotoSlab-Regular';
+    margin-top: 2px;
     color: #fff;
-    margin-left: 16px;
+    margin-left: 2px;
 `
 
 export const InfoShowWayPointsView = styled.View`
@@ -106,10 +107,14 @@ export const InfoShowWayPointsView = styled.View`
     align-items: center;
 `
 
-export const InfoTimeRemainingText = styled.Text`
-    font-size: 18px;
+export const InfoWaypointsTextView = styled.View`
+    flex-direction: row;
+`
+
+export const InfoTitleText = styled.Text`
+    font-size: 16px;
     font-family: 'RobotoSlab-Medium';
-    color: #fff;
+    color: #FFC66C;
     margin-left: 16px;
 `
 

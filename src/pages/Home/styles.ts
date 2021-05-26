@@ -90,7 +90,7 @@ export const InfoWaypointText = styled.Text`
     font-family: 'RobotoSlab-Regular';
     margin-top: 2px;
     color: #fff;
-    margin-left: 2px;
+    margin-left: 18px;
 `
 
 export const InfoShowWayPointsView = styled.View`
@@ -109,6 +109,9 @@ export const InfoShowWayPointsView = styled.View`
 
 export const InfoWaypointsTextView = styled.View`
     flex-direction: row;
+    align-items: center;
+    justify-content: center;
+
 `
 
 export const InfoTitleText = styled.Text`
@@ -233,14 +236,14 @@ export const WayPointTitleTimeArive = styled.Text`
 `
 
 export const WayPonitTitleDistance = styled.Text`
-    color: #C1C1C1;
-    font-size: 18px;
+    color: #FF9000;
+    font-size: 26px;
     font-family: 'RobotoSlab-Medium';
 `
 
 export const WayPonitTitleName = styled.Text`
     color: #fff;
-    font-size: 18px;
+    font-size: 26px;
     font-family: 'RobotoSlab-Medium';
 `
 

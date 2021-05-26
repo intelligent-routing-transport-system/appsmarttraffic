@@ -1,5 +1,5 @@
-import axios from 'axios'
+import axios from 'axios';
 
 export const apiRoute = axios.create({
-    baseURL: 'http://18.231.13.37:8080/app-api'
+    baseURL: 'https://jrlpgzdtl1.execute-api.sa-east-1.amazonaws.com/test/directions/api',
 })

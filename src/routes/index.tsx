@@ -12,15 +12,15 @@ const Auth = createStackNavigator();
 const Drawer = createDrawerNavigator();
 
 const AuthRoutes: React.FC = () => (
-        <Drawer.Navigator
-            drawerContent={DrawerMenu}
-            initialRouteName="Home"
-        >
-            <Drawer.Screen name="Home" component={Home} />
-            <Drawer.Screen name="Login" component={Login} />
-            <Drawer.Screen name="Profile" component={Profile} />
-            <Drawer.Screen name="CreateUser" component={CreateUser} />
-        </Drawer.Navigator>
+    <Drawer.Navigator
+        drawerContent={DrawerMenu}
+        initialRouteName="Home"
+    >
+        <Drawer.Screen name="Home" component={Home} />
+        <Drawer.Screen name="Login" component={Login} />
+        <Drawer.Screen name="Profile" component={Profile} />
+        <Drawer.Screen name="CreateUser" component={CreateUser} />
+    </Drawer.Navigator>
 )
 
 export default AuthRoutes;

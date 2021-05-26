@@ -49,7 +49,6 @@ import {
     SearchWayPointsList,
     SearchWayPonitText,
     TitlesView,
-    WayPointTitleTimeArive,
     WayPonitTitleDistance,
     WayPonitTitleName,
     SubViewTitles,
@@ -121,39 +120,41 @@ const Home: React.FC = () => {
             console.log(json);
 
             var route_pressed = await AsyncStorage.getItem('@RoutePressed');
-            await AsyncStorage.removeItem('@RoutePressed');
-
             var id = json.routeIdentifier.find(x => x == route_pressed);
+
+            //var id = json.routeIdentifier[0];  
             var locations: RouteGeoLocation[] = [];
 
-            if (route_pressed && id) {
-                Alert.alert('Aviso !', 'Recalculando Rota');
-                var response_data = (await apiRoute.get('routes/' + id)).data;
+            Alert.alert('Aviso !', 'Recalculando Rota');
+            var response_data = (await apiRoute.get('route/' + id)).data;
 
-                console.log(routes);
+            console.log(routes);
 
-                response_data.route.map((r) => {
-                    var aux: RouteGeoLocation = {
-                        latitude: r.latitude,
-                        longitude: r.longitude,
-                    }
-                    locations.push(aux);
-                });
+            response_data.route.map((r) => {
+                var aux: RouteGeoLocation = {
+                    latitude: r.latitude,
+                    longitude: r.longitude,
+                }
+                locations.push(aux);
+            });
 
-                response_data.incidents.map((i) => {
-                    var blockpoint: BlockPoint = {
-                        _id: i._id,
-                        coords: {
-                            latitude: i.Coords.Latitude,
-                            longitude: i.Coords.Longitude
-                        },
-                        description: i._id
-                    }
-                    setBlockPoints([...blockPoints, blockpoint]);
-                });
+            var blockpoints: BlockPoint[] = [];
+            response_data.incidents.map((i) => {
+                var blockpoint: BlockPoint = {
+                    _id: i._id,
+                    coords: {
+                        latitude: i.Coords.Latitude,
+                        longitude: i.Coords.Longitude
+                    },
+                    description: i._id
+                }
+                blockpoints.push(blockpoint)
+                console.log(blockpoint);
+            })
 
-                setRouteGeoLocation(locations);
-            }
+            setBlockPoints(blockpoints);
+
+            setRouteGeoLocation(locations);
         });
 
         return subscribe;
@@ -173,6 +174,30 @@ const Home: React.FC = () => {
                 }
             );
 
+            const grantedStorage = await PermissionsAndroid.request(
+                PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+                {
+                    title: "Smart Traffic App Permission",
+                    message:
+                        "Smart Traffic App needs access your Storage ",
+                    buttonNeutral: "Ask Me Later",
+                    buttonNegative: "Cancel",
+                    buttonPositive: "OK"
+                }
+            );
+
+            const grantedWrite = await PermissionsAndroid.request(
+                PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+                {
+                    title: "Smart Traffic App Permission",
+                    message:
+                        "Smart Traffic App needs access your Storage ",
+                    buttonNeutral: "Ask Me Later",
+                    buttonNegative: "Cancel",
+                    buttonPositive: "OK"
+                }
+            );
+
             if (granted == "granted") {
                 Geolocation.getCurrentPosition(infos => {
                     setCurrentLocation({
@@ -182,7 +207,7 @@ const Home: React.FC = () => {
                 })
             };
 
-            var responseRoutes = await apiRoute.get('routes');
+            var responseRoutes = await apiRoute.get('route/getRoutes');
             setRoutes(responseRoutes.data);
 
             let hasLine = true;
@@ -243,8 +268,9 @@ const Home: React.FC = () => {
 
                 await AsyncStorage.setItem('@RoutePressed', String(route?._id));
 
-                var response_data = (await apiRoute.get('routes/' + route?._id)).data;
+                var response_data = (await apiRoute.get('route/' + route?._id)).data;
 
+                var blockpoints: BlockPoint[] = [];
                 response_data.incidents.map((i) => {
                     var blockpoint: BlockPoint = {
                         _id: i._id,
@@ -254,8 +280,11 @@ const Home: React.FC = () => {
                         },
                         description: i._id
                     }
-                    setBlockPoints([...blockPoints, blockpoint]);
-                });
+                    blockpoints.push(blockpoint)
+                    console.log(blockpoint);
+                })
+
+                setBlockPoints(blockpoints);
 
                 response_data.route.map((r) => {
                     var aux: RouteGeoLocation = {
@@ -293,11 +322,16 @@ const Home: React.FC = () => {
             async function () {
                 let count = 1;
                 const routeName = (TextRouteNameRef.current._internalFiberInstanceHandleDEV.child.memoizedProps);
-                var favoriteLinesCache: LinesInterface = {
-                    routeId: String(v4()),
-                    routeName: String(routeName)
+
+                var FavoriteRouteFinded = favoritesLines.find(x => x.routeName == routeName)
+
+                if (!FavoriteRouteFinded) {
+                    var favoriteLinesCache: LinesInterface = {
+                        routeId: String(v4()),
+                        routeName: String(routeName)
+                    }
+                    setFavoritesLines([...favoritesLines, favoriteLinesCache]);
                 }
-                setFavoritesLines([...favoritesLines, favoriteLinesCache]);
 
                 favoritesLines.forEach(line => {
                     (async function () {
@@ -344,6 +378,14 @@ const Home: React.FC = () => {
         })
             ()
     }, [showCreateBlockPoint])
+
+    const handleRemoveFavoriteLine = useCallback((data, routeName) => {
+        var index = favoritesLines.findIndex(fv => fv.routeName == routeName);
+
+        favoritesLines.splice(index);
+
+        setFavoritesLines([...favoritesLines]);
+    }, [favoritesLines])
 
     return (
         <>
@@ -416,11 +458,6 @@ const Home: React.FC = () => {
                     }}>
                         <IconMaterial name="star" size={26} color="#FFC66C" />
                     </TouchButton>
-                    <TouchButtonMarkBlockPoint onPress={() => {
-                        setShowCreateBlockPoint(true);
-                    }}>
-                        <IconMaterial name='wrong-location' size={26} color="#FFC66C" />
-                    </TouchButtonMarkBlockPoint>
                 </Header>
             </Container>
 
@@ -437,7 +474,7 @@ const Home: React.FC = () => {
                             <ExitButton>
                                 <TouchButton
                                     onPress={handleCancelRoute}
-                                    style={{ backgroundColor: "#FFC66C", position: 'absolute', bottom: 10 }}
+                                    style={{ backgroundColor: "#FFC66C", position: 'absolute', bottom: 0 }}
                                 >
                                     <IconMaterial name="close" size={26} />
                                 </TouchButton>
@@ -464,7 +501,6 @@ const Home: React.FC = () => {
                             <IconFeather name="arrow-down" size={26} color="#000" />
                         </WayPointButton>
                         <TitlesView>
-                            <WayPointTitleTimeArive>18h60</WayPointTitleTimeArive>
                             <SubViewTitles>
                                 <WayPonitTitleDistance>Direção</WayPonitTitleDistance>
                                 <WayPonitTitleName ref={TextRouteNameRef}>{routePressed?.name}</WayPonitTitleName>
@@ -500,6 +536,9 @@ const Home: React.FC = () => {
                             <WayPointView>
                                 <IconFeather name="star" size={18} color="#FFC66C" />
                                 <WayPonitText>{item.routeName}</WayPonitText>
+                                <TouchButton onPress={() => handleRemoveFavoriteLine(item, item.routeName)}>
+                                    <IconFeather name="x" size={18} color="#FFC66C" />
+                                </TouchButton>
                             </WayPointView>
                         )}
                     />
@@ -510,63 +549,13 @@ const Home: React.FC = () => {
                             keyExtractor={(historyLines) => historyLines.routeId}
                             renderItem={({ item }) => (
                                 <WayPointView>
-                                    <IconFeather name="star" size={18} color="#FFC66C" />
+                                    <IconFeather name="clock" size={18} color="#FFC66C" />
                                     <WayPonitText>{item.routeName}</WayPonitText>
                                 </WayPointView>
                             )}
                         />
                     </HistoryLines>
                 </FavoriteLinesView>
-            )}
-
-
-            {showCreateBlockPoint && (
-                <CreateBlockPointView>
-                    <TouchButtonExitCreateBlockPoint onPress={() => setShowCreateBlockPoint(false)}>
-                        <IconFeather name="arrow-left" size={26} color="#000" />
-                    </TouchButtonExitCreateBlockPoint>
-                    <TitleCreateBlockPoint>Reportar Ponto Bloqueante na sua localização</TitleCreateBlockPoint>
-                    <Form ref={formRef} onSubmit={createBlockPoint}>
-                        <TitleDescriptionBlockPoint>Latitude</TitleDescriptionBlockPoint>
-                        <Input
-                            name="block-point-latitude"
-                            icon="navigation-2"
-                            value={String(currentLocation.latitude)}
-                            defaultValue={String(currentLocation.latitude)}
-                            editable={false}
-                            ref={createBlockPointLatitudeInputRef}
-                        />
-                        <TitleDescriptionBlockPoint>Longitude</TitleDescriptionBlockPoint>
-                        <Input
-                            name="block-point-longitude"
-                            icon="navigation-2"
-                            value={String(currentLocation.longitude)}
-                            defaultValue={String(currentLocation.longitude)}
-                            editable={false}
-                            ref={createBlockPointLongitudeInputRef}
-                        />
-                        <TitleDescriptionBlockPoint>Descrição</TitleDescriptionBlockPoint>
-                        <Input
-                            name="block-point-description"
-                            icon="type"
-                            placeholder="Descrição"
-                            ref={createBlockPointDescriptionInputRef}
-                        />
-                        <Button onPress={() => {
-                            formRef.current?.submitForm();
-                        }}>Criar</Button>
-                        {showCreateBlockPointDialog && (
-                            <Dialog.Container visible={true}>
-                                <Dialog.Title>Account delete</Dialog.Title>
-                                <Dialog.Description>
-                                    Do you want to delete this account? You cannot undo this action.
-                            </Dialog.Description>
-                                <Dialog.Button label="Cancel" onPress={() => { }} />
-                                <Dialog.Button label="Delete" onPress={() => { }} />
-                            </Dialog.Container>
-                        )}
-                    </Form>
-                </CreateBlockPointView>
             )}
         </>
     )
